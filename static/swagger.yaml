@@ -57,6 +57,14 @@ paths:
                     example: "mi_email@example.com"
         '400':
           description: Datos incompletos o formato inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "El correo electrónico no es válido o la contraseña no cumple con los requisitos."
         '409':
           description: Email o nombre de usuario ya registrado
         '500':
@@ -95,20 +103,31 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                      example: 1
-                    usuario:
-                      type: string
-                      example: "mi_usuario"
-                    email:
-                      type: string
-                      format: email
-                      example: "mi_email@example.com"
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 100
+                    description: Total de usuarios.
+                  total_pages:
+                    type: integer
+                    example: 10
+                    description: Total de páginas disponibles.
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        usuario:
+                          type: string
+                          example: "mi_usuario"
+                        email:
+                          type: string
+                          format: email
+                          example: "mi_email@example.com"
         '404':
           description: No hay usuarios registrados
         '500':

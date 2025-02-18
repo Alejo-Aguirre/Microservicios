@@ -150,7 +150,45 @@ def update_user(current_user, id):
 
     return jsonify({'message': 'Usuario actualizado exitosamente'}), 200
 
-# 5. Eliminar usuario
+# 5. actualizar usuario parcial
+@app.route('/usuarios/<int:id>', methods=['PATCH'])
+@token_required
+def partial_update_user(current_user, id):
+    data = request.get_json()
+
+    cur = mysql.connection.cursor()
+    # Verificar si el usuario existe
+    cur.execute("SELECT * FROM usuarios WHERE id = %s", (id,))
+    user = cur.fetchone()
+
+    if not user:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+
+    # Verificar si el usuario tiene permisos para modificar (puedes validar por 'current_user' si es necesario)
+    if user[0] != current_user:
+        return jsonify({'message': 'No tienes permiso para modificar este usuario'}), 403
+
+    # Actualizar parcialmente los datos
+    update_data = {
+        'usuario': data.get('usuario', user[1]),  # Si no se pasa el dato, mantener el actual
+        'email': data.get('email', user[2]),
+        'clave': bcrypt.hashpw(data.get('clave', user[3]).encode('utf-8'), bcrypt.gensalt()) if data.get('clave') else user[3]
+    }
+
+    # Solo actualizar los campos que han cambiado
+    cur.execute(""" 
+        UPDATE usuarios
+        SET usuario = %s, email = %s, clave = %s
+        WHERE id = %s
+    """, (update_data['usuario'], update_data['email'], update_data['clave'], id))
+
+    mysql.connection.commit()
+    cur.close()
+
+    return jsonify({'message': 'Usuario actualizado parcialmente exitosamente'}), 200
+
+
+# 6. Eliminar usuario
 @app.route('/usuarios/<int:id>', methods=['DELETE'])
 @token_required
 def delete_user(current_user, id):
@@ -171,7 +209,7 @@ def delete_user(current_user, id):
 
     return jsonify({'message': 'Usuario eliminado exitosamente'}), 204
 
-# 6. Login de usuario
+# 7. Login de usuario
 @app.route('/usuarios/login', methods=['POST'])
 def login_user():
     data = request.get_json()
@@ -196,7 +234,7 @@ def login_user():
 
     return jsonify({'token': token}), 200
 
-# 7. Recuperación de clave
+# 8. Recuperación de clave
 @app.route('/usuarios/recover-password', methods=['POST'])
 def recover_password():
     data = request.get_json()
