@@ -1,0 +1,6 @@
+pip pip install flask-mysqldb
+pip install bcrypt
+pip install pyjwt
+pip install flask-swagger-ui
+pip install Flask-SQLAlchemy
+pip install flask-mysql flask-swagger-ui

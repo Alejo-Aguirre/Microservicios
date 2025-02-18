@@ -1,0 +1,330 @@
+openapi: 3.0.0
+info:
+  title: Gestión de Usuarios API
+  description: API para gestionar usuarios, incluyendo registro, login, actualización y recuperación de contraseña.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+    description: Servidor de desarrollo
+paths:
+  /usuarios:
+    post:
+      summary: Registra un nuevo usuario
+      description: Crea un nuevo usuario en el sistema.
+      requestBody:
+        description: Datos del usuario para el registro
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuario:
+                  type: string
+                  example: "mi_usuario"
+                  description: Nombre de usuario único.
+                email:
+                  type: string
+                  format: email
+                  example: "mi_email@example.com"
+                  description: Correo electrónico del usuario.
+                clave:
+                  type: string
+                  example: "mi_contraseña"
+                  description: Contraseña del usuario.
+              required:
+                - usuario
+                - email
+                - clave
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                    description: ID del usuario registrado.
+                  usuario:
+                    type: string
+                    example: "mi_usuario"
+                  email:
+                    type: string
+                    format: email
+                    example: "mi_email@example.com"
+        '400':
+          description: Datos incompletos o formato inválido
+        '409':
+          description: Email o nombre de usuario ya registrado
+        '500':
+          description: Error en el servidor
+
+    get:
+      summary: Obtiene la lista de todos los usuarios
+      description: Retorna una lista paginada y filtrable de usuarios registrados.
+      parameters:
+        - name: page
+          in: query
+          description: Número de página para la paginación.
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: limit
+          in: query
+          description: Número de usuarios por página.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: email
+          in: query
+          description: Filtro por correo electrónico.
+          required: false
+          schema:
+            type: string
+            format: email
+      security:
+        - bearerAuth: []  # Ruta protegida por JWT
+      responses:
+        '200':
+          description: Lista de usuarios devuelta exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    usuario:
+                      type: string
+                      example: "mi_usuario"
+                    email:
+                      type: string
+                      format: email
+                      example: "mi_email@example.com"
+        '404':
+          description: No hay usuarios registrados
+        '500':
+          description: Error en el servidor
+
+  /usuarios/{id}:
+    get:
+      summary: Obtiene un usuario por ID
+      description: Retorna los datos de un usuario específico.
+      parameters:
+        - name: id
+          in: path
+          description: ID del usuario a consultar.
+          required: true
+          schema:
+            type: integer
+            example: 1
+      security:
+        - bearerAuth: []  # Ruta protegida por JWT
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  usuario:
+                    type: string
+                    example: "mi_usuario"
+                  email:
+                    type: string
+                    format: email
+                    example: "mi_email@example.com"
+        '404':
+          description: Usuario no encontrado
+        '500':
+          description: Error en el servidor
+
+    put:
+      summary: Actualiza un usuario existente (completo)
+      description: Actualiza todos los campos de un usuario.
+      parameters:
+        - name: id
+          in: path
+          description: ID del usuario a actualizar.
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        description: Datos del usuario para actualizar
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuario:
+                  type: string
+                  example: "mi_usuario_actualizado"
+                email:
+                  type: string
+                  format: email
+                  example: "mi_email_actualizado@example.com"
+                clave:
+                  type: string
+                  example: "mi_nueva_contraseña"
+              required:
+                - usuario
+                - email
+                - clave
+      security:
+        - bearerAuth: []  # Ruta protegida por JWT
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+        '400':
+          description: Datos incompletos o formato inválido
+        '404':
+          description: Usuario no encontrado
+        '500':
+          description: Error en el servidor
+
+    patch:
+      summary: Actualiza un usuario existente (parcial)
+      description: Actualiza campos específicos de un usuario.
+      parameters:
+        - name: id
+          in: path
+          description: ID del usuario a actualizar.
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        description: Datos parciales del usuario para actualizar
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuario:
+                  type: string
+                  example: "mi_usuario_actualizado"
+                email:
+                  type: string
+                  format: email
+                  example: "mi_email_actualizado@example.com"
+                clave:
+                  type: string
+                  example: "mi_nueva_contraseña"
+      security:
+        - bearerAuth: []  # Ruta protegida por JWT
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+        '400':
+          description: Datos incompletos o formato inválido
+        '404':
+          description: Usuario no encontrado
+        '500':
+          description: Error en el servidor
+
+    delete:
+      summary: Elimina un usuario por ID
+      description: Elimina un usuario del sistema.
+      parameters:
+        - name: id
+          in: path
+          description: ID del usuario a eliminar.
+          required: true
+          schema:
+            type: integer
+            example: 1
+      security:
+        - bearerAuth: []  # Ruta protegida por JWT
+      responses:
+        '204':
+          description: Usuario eliminado exitosamente
+        '404':
+          description: Usuario no encontrado
+        '500':
+          description: Error en el servidor
+
+  /usuarios/login:
+    post:
+      summary: Autentica a un usuario y genera un token JWT
+      description: Permite a un usuario autenticarse y obtener un token de acceso.
+      requestBody:
+        description: Datos del usuario para login
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "mi_email@example.com"
+                clave:
+                  type: string
+                  example: "mi_contraseña"
+              required:
+                - email
+                - clave
+      responses:
+        '200':
+          description: Login exitoso, retorna token de autenticación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNjcwNTQxNjAwfQ.N3INRAe3OMszNZUSzD50JfaA3bFAHlE0b0V_o7RTqP3tE"
+        '401':
+          description: Credenciales incorrectas
+        '500':
+          description: Error en el servidor
+
+  /usuarios/recover-password:
+    post:
+      summary: Envía instrucciones para recuperar la contraseña
+      description: Envía un correo electrónico con instrucciones para recuperar la contraseña.
+      requestBody:
+        description: Email del usuario para recuperación de contraseña
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "mi_email@example.com"
+              required:
+                - email
+      responses:
+        '200':
+          description: Instrucciones para recuperar la clave enviadas al email
+        '404':
+          description: Email no registrado
+        '500':
+          description: Error en el servidor
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
